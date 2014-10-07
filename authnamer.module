@@ -124,6 +124,7 @@ function authnamer_claim_user($users) {
       // To return a single user object, wrap "user_load_multiple" with "array_shift" or equivalent.
       // Example: array_shift(user_load_multiple(array(), $uid))
       $auser = user_load($uid);
+      dsm($auser);
       $userinfo = array(
         "authname_$module" => $auser->name,
         );
