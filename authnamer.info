@@ -1,5 +1,5 @@
 ; $Id$
 name = Authmap Authnamer
-description = Allow existing Drupal users to be authorized by a different authorization system
+description = Allow existing Drupal users to be authorized by a different authorization module
 package = Other
 core = 7.x
