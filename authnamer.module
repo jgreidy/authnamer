@@ -18,7 +18,7 @@ function authnamer_admin() {
   $form['authnamer_auth_module'] = array(
     '#type' => 'textfield',
     '#title' => t('Authorization module name'),
-    '#default_value' => variable_get('authnamer_authname', ''),
+    '#default_value' => variable_get('authnamer_auth_module', ''),
     '#size' => 40,
     '#maxlength' => 80,
     '#description' => t("The 'machine name' of the authorization module (eg. simplesamlphp_auth)."),
@@ -96,7 +96,7 @@ function authnamer_user_OLD($op, &$edit, &$account, $category = NULL) { }
  * Implements hook_user_operations().
  */
 function authnamer_user_operations() {
-  $module = variable_get('authnamer_authname', '');
+  $module = variable_get('authnamer_auth_module', '');
   if (empty($module)) {
     return array();
   }
@@ -114,7 +114,7 @@ function authnamer_user_operations() {
  */
 function authnamer_claim_user($users, $view) {
   // see http://api.drupal.org/api/drupal/modules--user--user.module/function/user_external_login_register/6
-  $module = variable_get('authnamer_authname', '');
+  $module = variable_get('authnamer_auth_module', '');
   if (empty($module)) {
     drupal_set_message(t('First specify an authentication module at admin/settings/authnamer.'), 'status', FALSE);
   }
