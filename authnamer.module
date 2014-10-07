@@ -1,0 +1,133 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Allow existing Drupal users to be authorized by a different authorization system
+ * look for the option to
+ *   'Allow existing Drupal users to be authorized by a different authorization system'
+ *  under the Update options popup at admin/user/user.
+ *  specify the authorizaton module at admin/settings/authnamer.
+ */
+
+/**
+ * system settings form page
+ * @return form allows setting the name of the authorization system
+ */
+function authnamer_admin() {
+  $form = array();
+  $form['authnamer_auth_module'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Authorization module name'),
+    '#default_value' => variable_get('authnamer_authname', ''),
+    '#size' => 40,
+    '#maxlength' => 80,
+    '#description' => t("The 'machine name' of the authorization module (eg. simplesamlphp_auth)."),
+    '#required' => TRUE,
+  );
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_admin_validate()
+ * @param  form $form       authnamer_admin form
+ * @param  form_state $form_state state of the form
+ * @return none             sets form error it problems arise
+ */
+function authnamer_admin_validate($form, &$form_state) {
+  $module = $form_state['values']['authnamer_auth_module'];
+  if (!module_exists($module)) {
+    form_set_error('authnamer_auth_module', t('You must enter the machine name of a module enabled on this site.'));
+  }
+}
+
+/**
+ * Implements hook_menu()
+ * @return array menu items
+ */
+function authnamer_menu() {
+  $items = array();
+  $items['admin/settings/authnamer'] = array(
+    'title' => 'Authmap authnamer module settings',
+    'description' => 'Name the module an existing user can authorize with.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('authnamer_admin'),
+    'access arguments' => array('administer authnamer settings'),
+    'type' => MENU_NORMAL_ITEM,
+   );
+  return $items;
+}
+
+/**
+ * Implements hook_permission()
+ * @return array permission info
+ */
+function authnamer_permission() {
+  return array(
+    'administer authnamer settings' => array(
+      'title' => t('Access Authmap authnamer settings'),
+      'description' => t('Name the module an existing user can authenticate with.'),
+      ),
+    );
+}
+
+/**
+ * Implements hook_action_info().
+ */
+function authnamer_action_info() {
+  return array(
+    'authnamer_set_authentication_module' => array(
+      'type' => 'user',
+      'label' => t('Allow existing Drupal users to be authorized by a different authorization system'),
+      'behavior' => array('changes_property'),
+      'configurable' => FALSE,
+      'vbo_configurable' => FALSE,
+      'triggers' => array('any'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_user().
+ * ONLY IN DRUPAL 6
+ */
+function authnamer_user_OLD($op, &$edit, &$account, $category = NULL) { }
+
+/**
+ * Implements hook_user_operations().
+ */
+function authnamer_user_operations() {
+  $module = variable_get('authnamer_authname', '');
+  if (empty($module)) {
+    return array();
+  }
+  return array(
+    'authnamer' => array(
+      'label' => t('Change user authentication module'),
+      'callback' => 'authnamer_claim_user',
+    ),
+  );
+}
+
+/**
+ * Mark the user for some modules authentication
+ * @param array $accounts
+ */
+function authnamer_claim_user($users, $view) {
+  // see http://api.drupal.org/api/drupal/modules--user--user.module/function/user_external_login_register/6
+  $module = variable_get('authnamer_authname', '');
+  if (empty($module)) {
+    drupal_set_message(t('First specify an authentication module at admin/settings/authnamer.'), 'status', FALSE);
+  }
+  else {
+    foreach ($users as $uid) {
+      // TODO Convert "user_load" to "user_load_multiple" if "$uid" is other than a uid.
+      // To return a single user object, wrap "user_load_multiple" with "array_shift" or equivalent.
+      // Example: array_shift(user_load_multiple(array(), $uid))
+      $auser = user_load($uid);
+      $userinfo = array(
+        "authname_$module" => $auser->name,
+        );
+      $account = user_save($auser, $userinfo);
+    }
+  }
+}
