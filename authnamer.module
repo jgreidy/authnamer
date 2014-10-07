@@ -102,7 +102,7 @@ function authnamer_user_operations() {
   }
   return array(
     'authnamer' => array(
-      'label' => t('Change user authentication module'),
+      'label' => t('Change user authentication module to @module.', array('@module' => $module)),
       'callback' => 'authnamer_claim_user',
     ),
   );
