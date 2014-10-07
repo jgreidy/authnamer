@@ -112,7 +112,7 @@ function authnamer_user_operations() {
  * Mark the user for some modules authentication
  * @param array $accounts
  */
-function authnamer_claim_user($users, $view) {
+function authnamer_claim_user($users) {
   // see http://api.drupal.org/api/drupal/modules--user--user.module/function/user_external_login_register/6
   $module = variable_get('authnamer_auth_module', '');
   if (empty($module)) {
