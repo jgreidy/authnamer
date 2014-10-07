@@ -124,11 +124,10 @@ function authnamer_claim_user($users) {
       // To return a single user object, wrap "user_load_multiple" with "array_shift" or equivalent.
       // Example: array_shift(user_load_multiple(array(), $uid))
       $auser = user_load($uid);
-      drupal_set_message(print_r($auser,true), 'status', FALSE);
-      $userinfo = array(
+      $authmaps = array(
         "authname_$module" => $auser->name,
         );
-      $account = user_save($auser, $userinfo);
+      user_set_authmaps($auser, $authmaps);
     }
   }
 }
